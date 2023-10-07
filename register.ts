@@ -103,11 +103,13 @@ const main = async () => {
   router.get("/search", (ctx: RouterContext) => {
     const q = helpers.getQuery(ctx, { mergeParams: true });
     console.debug("query:", q);
-    const results = db.drawings.filter((drawing: Drawing) =>
-      drawing.no.includes(q.no) && drawing.name.includes(q.name)
-    );
+    const results = db.drawings.filter((drawing: Drawing) => {
+      // q.noかつq.nameを含んでいるレコードだけ返す
+      return (!q.no || drawing.no.includes(q.no)) &&
+        (!q.name || drawing.name.includes(q.name));
+    });
     console.debug("matched:", results);
-    ctx.response.body = { data: results };
+    ctx.response.body = results;
   });
 
   // 結果をJSONで配信
