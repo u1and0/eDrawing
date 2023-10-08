@@ -2,7 +2,7 @@
 import { fromFileUrl } from "https://deno.land/std@0.203.0/path/win32.ts";
 import { walk } from "https:deno.land/std/fs/mod.ts";
 import { DB } from "https:deno.land/x/sqlite/mod.ts";
-// import { serve } from "https:deno.land/std/http/server.ts";
+import { Eta } from "https://deno.land/x/eta/src/index.ts";
 import {
   Application,
   helpers,
@@ -118,6 +118,13 @@ const main = async () => {
   app.use(router.routes());
   app.use(router.allowedMethods());
   console.log(`distribute on localhost:${port}`);
+
+  router.get("/hello", (ctx: RouterContext) => {
+    const eta = new Eta({ views: "./templates" });
+    const res = eta.render("./index", { name: "Ben" });
+    ctx.response.type = "text/html";
+    ctx.response.body = res;
+  });
 
   await app.listen({ port: port });
   db.close(); // 最後にかならずDBを閉じる
