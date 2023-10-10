@@ -7,7 +7,24 @@
 </head>
 <body>
   <h1>eDrawing</h1>
-  Hi <%= it.name %>!
-  <input type="text">
+
+  <!-- 検索窓 -->
+  <div class="input-group input-group-sm mb-3">
+    <span class="input-group-text">図面No</span>
+    <input type="text" id="no" class="form-control" size="10" oninput="fetchSearchInput()">
+  </div>
+  <div class="input-group input-group-sm mb-3">
+    <span class="input-group-text">図面名称</span>
+    <input type="text" id="name" class="form-control" size="10" oninput="fetchSearchInput()">
+  </div>
+
+  <!-- 結果またはエラーの表示 -->
+  <div class="spinner-border" role="status" style="display:none;">
+      <span class="visually-hidden">Loading...</span>
+  </div>
+
+  <div id="error-div"></div>
+  <table id="result-table" class="table table-striped table-hover"></table>
+
   <script type="text/javascript" src="/main.js"></script>
 </body>

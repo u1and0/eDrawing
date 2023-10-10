@@ -1,5 +1,4 @@
 /* data以下のtifファイルをedawing.dbへ追加 */
-import { fromFileUrl } from "https://deno.land/std@0.203.0/path/win32.ts";
 import { walk } from "https:deno.land/std/fs/mod.ts";
 import { DB } from "https:deno.land/x/sqlite/mod.ts";
 import { Eta } from "https://deno.land/x/eta/src/index.ts";
@@ -37,10 +36,10 @@ class EDB extends DB {
     super(dbPath);
     for (const row of super.query("SELECT * FROM 図面")) {
       const drawing: Drawing = {
-        no: row[0],
-        name: row[1],
-        filename: row[2],
-        binary: row[3],
+        no: row[0] as string,
+        name: row[1] as string,
+        filename: row[2] as string,
+        binary: row[3] as Uint8Array,
       };
       this.drawings.push(drawing);
     }
@@ -66,7 +65,12 @@ class EDB extends DB {
   insert(d: Drawing) {
     super.query(
       ` INSERT INTO 図面 (no, name ,filename,  binary) VALUES (?, ?, ?, ?)`,
-      [d.no, d.name, d.filename, d.binary],
+      [
+        d.no as string,
+        d.name as string,
+        d.filename as string,
+        d.binary as Uint8Array,
+      ],
     );
   }
 }
@@ -99,14 +103,31 @@ const main = async () => {
 
   /* エンドポイント定義 */
 
+  // User interface router group
   const router = new Router();
   router.get("/", (ctx: RouterContext) => {
     ctx.response.body = "Hello world!";
   });
 
   // Sample
+  // localhost:3000/hello?name=Ben
+  router.get("/index", (ctx: RouterContext) => {
+    const q = helpers.getQuery(ctx, { mergeParams: true });
+    const eta = new Eta({ views: "./templates" });
+    const res = eta.render("./index", {
+      version: VERSION,
+      name: q.name,
+    });
+    ctx.response.type = "text/html";
+    ctx.response.body = res;
+  });
+
+  // Application programing interface router group
+  const apiv1 = new Router();
+
+  // Sample
   // localhost:3000/search?no=555&name=1
-  router.get("/search", (ctx: RouterContext) => {
+  apiv1.get("/search", (ctx: RouterContext) => {
     const q = helpers.getQuery(ctx, { mergeParams: true });
     console.debug("query:", q);
     const results = db.drawings.filter((drawing: Drawing) => {
@@ -119,18 +140,7 @@ const main = async () => {
     ctx.response.body = results;
   });
 
-  // Sample
-  // localhost:3000/hello?name=Ben
-  router.get("/hello", (ctx: RouterContext) => {
-    const q = helpers.getQuery(ctx, { mergeParams: true });
-    const eta = new Eta({ views: "./templates" });
-    const res = eta.render("./index", {
-      version: VERSION,
-      name: q.name,
-    });
-    ctx.response.type = "text/html";
-    ctx.response.body = res;
-  });
+  router.use("/api/v1", apiv1.routes(), apiv1.allowedMethods());
 
   /* appを立てて配信 */
   const app = new Application();
