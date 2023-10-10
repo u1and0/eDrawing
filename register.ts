@@ -11,6 +11,8 @@ import {
   send,
 } from "https:deno.land/x/oak/mod.ts";
 
+const VERSION = "v0.1.0";
+
 async function readFiles(root: string): Promise<string[]> {
   const paths = [];
   for await (const entry of walk(root)) {
@@ -122,7 +124,10 @@ const main = async () => {
   router.get("/hello", (ctx: RouterContext) => {
     const q = helpers.getQuery(ctx, { mergeParams: true });
     const eta = new Eta({ views: "./templates" });
-    const res = eta.render("./index", { name: q.name });
+    const res = eta.render("./index", {
+      version: VERSION,
+      name: q.name,
+    });
     ctx.response.type = "text/html";
     ctx.response.body = res;
   });
