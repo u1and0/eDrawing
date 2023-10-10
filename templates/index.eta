@@ -1,5 +1,7 @@
 <head>
+  <title>eDrawing</title>
   <meta version="v0.1.0">
+  <link href="/style.css" rel="stylesheet">
 </head>
 <body>
   <h1>eDrawing</h1>

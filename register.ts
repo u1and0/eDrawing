@@ -8,6 +8,7 @@ import {
   helpers,
   Router,
   RouterContext,
+  send,
 } from "https:deno.land/x/oak/mod.ts";
 
 async function readFiles(root: string): Promise<string[]> {
@@ -94,12 +95,15 @@ const newTest = () => {
 const main = async () => {
   const db = new EDB("./data/edrawing.db");
 
-  // エンドポイント定義
+  /* エンドポイント定義 */
+
   const router = new Router();
   router.get("/", (ctx: RouterContext) => {
     ctx.response.body = "Hello world!";
   });
 
+  // Sample
+  // localhost:3000/search?no=555&name=1
   router.get("/search", (ctx: RouterContext) => {
     const q = helpers.getQuery(ctx, { mergeParams: true });
     console.debug("query:", q);
@@ -109,23 +113,32 @@ const main = async () => {
         (!q.name || drawing.name.includes(q.name));
     });
     console.debug("matched:", results);
+    // string[]形式のJSONを返す
     ctx.response.body = results;
   });
 
-  // 結果をJSONで配信
-  const app = new Application();
-  const port = 3000;
-  app.use(router.routes());
-  app.use(router.allowedMethods());
-  console.log(`distribute on localhost:${port}`);
-
+  // Sample
+  // localhost:3000/hello?name=Ben
   router.get("/hello", (ctx: RouterContext) => {
+    const q = helpers.getQuery(ctx, { mergeParams: true });
     const eta = new Eta({ views: "./templates" });
-    const res = eta.render("./index", { name: "Ben" });
+    const res = eta.render("./index", { name: q.name });
     ctx.response.type = "text/html";
     ctx.response.body = res;
   });
 
+  /* appを立てて配信 */
+  const app = new Application();
+  const port = 3000;
+  app.use(router.routes());
+  app.use(router.allowedMethods());
+  app.use(async (ctx: RouterContext) => {
+    await send(ctx, ctx.request.url.pathname, {
+      root: `${Deno.cwd()}/static`,
+    });
+  });
+
+  console.log(`distribute on localhost:${port}`);
   await app.listen({ port: port });
   db.close(); // 最後にかならずDBを閉じる
 };
