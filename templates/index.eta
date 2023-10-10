@@ -7,4 +7,5 @@
   <h1>eDrawing</h1>
   Hi <%= it.name %>!
   <input type="text">
+  <script type="text/javascript" src="/main.js"></script>
 </body>
