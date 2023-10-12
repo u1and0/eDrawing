@@ -27,7 +27,7 @@ type Drawing = {
   no: string;
   name: string;
   filename: string;
-  binary: Uint8Array;
+  binary: string[];
 };
 
 class EDB extends DB {
@@ -69,7 +69,7 @@ class EDB extends DB {
         d.no as string,
         d.name as string,
         d.filename as string,
-        d.binary as Uint8Array,
+        d.binary as string[],
       ],
     );
   }

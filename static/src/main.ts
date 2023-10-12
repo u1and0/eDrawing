@@ -2,10 +2,11 @@ const root: URL = new URL(window.location.href);
 let timeoutID: number;
 
 type Drawing = {
+  [key: string]: string | number[];
   no: string;
   name: string;
   filename: string;
-  binary: Uint8Array;
+  binary: number[];
 };
 
 type Header = {
@@ -99,7 +100,6 @@ const createTable = (drawings: Drawing[]): void => {
   const header: Header[] = [
     { name: "図面No", value: "no" },
     { name: "図面名", value: "name" },
-    { name: "ファイル名", value: "filename" },
   ];
   createTableHeader(resultTable, header);
 
@@ -108,17 +108,24 @@ const createTable = (drawings: Drawing[]): void => {
     const tr = tbody.insertRow();
     header.forEach((h: Header) => {
       const td = tr.insertCell();
-      if (h.name === "ファイル名") {
+      if (h.name === "図面No") {
+        // バイナリをBlobへ変換
         const array = new Uint8Array(drawing.binary);
         const blob = new Blob([array]);
+        // バイナリとファイル名をaタグへ挿入
         const a = document.createElement("a");
-        // Blob オブジェクトをURLへ変換
+        // Blob オブジェクトをURLへ変換し、aタグへ挿入
         a.href = URL.createObjectURL(blob);
-        a.download = "image.tif";
-        a.textContent = drawing.filename;
+
+        // ファイル名を決めてaタグへ挿入
+        const ext = drawing.filename.split(".").pop();
+        a.download = `${drawing.no}_${drawing.name}.${ext}`;
+        a.textContent = drawing.no;
         td.appendChild(a);
       } else {
-        const text = drawing[h.value] === null ? "" : drawing[h.value];
+        const text: string = drawing[h.value] === null
+          ? ""
+          : drawing[h.value].toString();
         td.appendChild(document.createTextNode(text));
       }
     });
