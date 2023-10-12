@@ -44,44 +44,47 @@ const main = async () => {
   const db = new EDB();
   db.load();
 
-  /* エンドポイント定義 */
+  /* エンドポイント関数定義 */
 
-  // User interface router group
-  const router = new Router();
-  router.get("/", (ctx: RouterContext) => {
-    ctx.response.body = "Hello world!";
-  });
-
-  // Sample
-  // localhost:3000/hello?name=Ben
-  router.get("/index", (ctx: RouterContext) => {
-    const q = helpers.getQuery(ctx, { mergeParams: true });
+  // topPage API はトップページへアクセスするHTMLハンドラです。
+  const topPage = (ctx: RouterContext) => {
     const eta = new Eta({ views: "./templates" });
     const res = eta.render("./index", {
       version: VERSION,
-      name: q.name,
     });
     ctx.response.type = "text/html";
     ctx.response.body = res;
-  });
+  };
 
-  // Application programing interface router group
-  const apiv1 = new Router();
-
-  // Sample
-  // localhost:3000/search?no=555&name=1
-  apiv1.get("/search", (ctx: RouterContext) => {
+  // search API は図面番号と図面名称を渡してそれが含まれるDrawingインスタンスを返します。
+  const search = (ctx: RouterContext) => {
     const q = helpers.getQuery(ctx, { mergeParams: true });
     console.debug("query:", q);
     const results = db.drawings.filter((drawing: Drawing) => {
       // q.noかつq.nameを含んでいるレコードだけ返す
-      return (!q.no || drawing.no.includes(q.no)) &&
+      return (!q.no || drawing.no.includes(q.no.toUpperCase())) &&
         (!q.name || drawing.name.includes(q.name));
     });
     console.debug("matched:", results);
     // string[]形式のJSONを返す
     ctx.response.body = results;
-  });
+  };
+
+  /* エンドポイント定義 */
+
+  // User interface router group
+  const router = new Router();
+  router
+    .get("/", (ctx: RouterContext) => {
+      ctx.response.body = "Hello world!";
+    })
+    .get("/index", (ctx: RouterContext) => topPage(ctx));
+
+  // Application programing interface router group
+  const apiv1 = new Router();
+
+  // Sample:localhost:3000/search?no=555&name=1
+  apiv1.get("/search", (ctx: RouterContext) => search(ctx));
 
   router.use("/api/v1", apiv1.routes(), apiv1.allowedMethods());
 
