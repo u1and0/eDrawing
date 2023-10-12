@@ -27,7 +27,7 @@ type Drawing = {
   no: string;
   name: string;
   filename: string;
-  binary: Blob | Uint8Array;
+  binary: Uint8Array;
 };
 
 class EDB extends DB {
@@ -39,7 +39,7 @@ class EDB extends DB {
         no: row[0] as string,
         name: row[1] as string,
         filename: row[2] as string,
-        binary: row[3] as Uint8Array,
+        binary: Array.from(row[3] as Uint8Array),
       };
       this.drawings.push(drawing);
     }

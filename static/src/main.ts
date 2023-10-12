@@ -5,7 +5,7 @@ type Drawing = {
   no: string;
   name: string;
   filename: string;
-  binary: Blob | Uint8Array;
+  binary: Uint8Array;
 };
 
 type Header = {
@@ -108,8 +108,19 @@ const createTable = (drawings: Drawing[]): void => {
     const tr = tbody.insertRow();
     header.forEach((h: Header) => {
       const td = tr.insertCell();
-      const text = drawing[h.value] === null ? "" : drawing[h.value];
-      td.appendChild(document.createTextNode(text));
+      if (h.name === "ファイル名") {
+        const array = new Uint8Array(drawing.binary);
+        const blob = new Blob([array]);
+        const a = document.createElement("a");
+        // Blob オブジェクトをURLへ変換
+        a.href = URL.createObjectURL(blob);
+        a.download = "image.tif";
+        a.textContent = drawing.filename;
+        td.appendChild(a);
+      } else {
+        const text = drawing[h.value] === null ? "" : drawing[h.value];
+        td.appendChild(document.createTextNode(text));
+      }
     });
     tbody.appendChild(tr);
   });
