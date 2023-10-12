@@ -100,6 +100,10 @@ const createTable = (drawings: Drawing[]): void => {
   const header: Header[] = [
     { name: "図面No", value: "no" },
     { name: "図面名", value: "name" },
+    { name: "作成者", value: "creator" },
+    { name: "作成日", value: "createdDate" },
+    { name: "更新者", value: "modifier" },
+    { name: "更新日", value: "modifiedDate" },
   ];
   createTableHeader(resultTable, header);
 

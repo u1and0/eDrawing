@@ -11,6 +11,8 @@ import {
 } from "https:deno.land/x/oak/mod.ts";
 
 const VERSION = "v0.1.0";
+const dbfile = "./data/edrawing.db";
+const tableName = "DrawingTable";
 
 async function readFiles(root: string): Promise<string[]> {
   const paths = [];
@@ -22,24 +24,46 @@ async function readFiles(root: string): Promise<string[]> {
   return paths;
 }
 
+class Folder {
+  constructor() {
+  }
+}
+
 // 図面のプロパティ
 type Drawing = {
+  // Standard info
   no: string;
   name: string;
+  creator: string;
+  createdDate: Date;
+  modifier: string;
+  modifiedDate: Date;
+  // Image
   filename: string;
-  binary: string[];
+  binary: Uint8Array;
+  // Folder info
+  // pairentsFolder: Folder[];
+  // Graph info
+  // pairentsDrawings: Drawing[];
+  // childrenDrawings: Drawing[];
 };
 
 class EDB extends DB {
   drawings: Drawing[] = [];
   constructor(dbPath: string) {
     super(dbPath);
-    for (const row of super.query("SELECT * FROM 図面")) {
+  }
+  load() {
+    for (const row of super.query(`SELECT * FROM ${tableName}`)) {
       const drawing: Drawing = {
         no: row[0] as string,
         name: row[1] as string,
-        filename: row[2] as string,
-        binary: Array.from(row[3] as Uint8Array),
+        creator: row[2] as string,
+        createdDate: row[3] as Date,
+        modifier: row[4] as string,
+        modifiedDate: row[5] as Date,
+        filename: row[6] as string,
+        binary: Array.from(row[7] as Uint8Array),
       };
       this.drawings.push(drawing);
     }
@@ -50,11 +74,15 @@ class EDB extends DB {
   // テスト用のテーブルを新規作成する
   refresh() {
     // DBを新規作成
-    super.execute("DROP TABLE IF EXISTS 図面");
+    super.execute(`DROP TABLE IF EXISTS ${tableName}`);
     super.execute(`
-             CREATE TABLE IF NOT EXISTS 図面 (
+             CREATE TABLE IF NOT EXISTS ${tableName} (
                no TEXT PRIMARY KEY,
                name TEXT,
+               creator TEXT,
+               createdDate TEXT,
+               modifier TEXT,
+               modifiedDate TEXT,
                filename TEXT,
                binary BLOB
              )
@@ -63,21 +91,36 @@ class EDB extends DB {
 
   // Drawingを新規レコードとして追加
   insert(d: Drawing) {
+    const convert = [
+      d.no as string,
+      d.name as string,
+      d.creator as string,
+      d.createdDate as Date,
+      d.modifier as string,
+      d.modifiedDate as Date,
+      d.filename as string,
+      d.binary as Uint8Array,
+    ];
+    console.log(convert);
     super.query(
-      ` INSERT INTO 図面 (no, name ,filename,  binary) VALUES (?, ?, ?, ?)`,
-      [
-        d.no as string,
-        d.name as string,
-        d.filename as string,
-        d.binary as string[],
-      ],
+      `INSERT INTO ${tableName} (
+        no,
+        name,
+        creator,
+        createdDate,
+        modifier,
+        modifiedDate,
+        filename,
+        binary
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      convert,
     );
   }
 }
 
 // テストデータを更新
 const newTest = () => {
-  const db = new EDB("./data/edrawing.db");
+  const db = new EDB(dbfile);
   db.refresh();
   readFiles("./data")
     .then((imagePaths) => {
@@ -88,6 +131,10 @@ const newTest = () => {
         const drawing: Drawing = {
           no: `RSW55555${i}`,
           name: `テストモジュール${i}`,
+          creator: `Tester${i}`,
+          createdDate: new Date(2000, 1, 2, 6, 4, 5),
+          modifier: `Tester${i + 10}`,
+          modifiedDate: new Date(),
           filename: path,
           binary: image,
         };
@@ -99,7 +146,8 @@ const newTest = () => {
 };
 
 const main = async () => {
-  const db = new EDB("./data/edrawing.db");
+  const db = new EDB(dbfile);
+  db.load();
 
   /* エンドポイント定義 */
 
@@ -159,3 +207,4 @@ const main = async () => {
 };
 
 await main();
+// newTest(); // 古いテストデータを捨てて新しいテストデータを構築する

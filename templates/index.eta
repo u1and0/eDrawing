@@ -9,14 +9,24 @@
   <h1>eDrawing</h1>
 
   <!-- 検索窓 -->
-  <div class="input-group input-group-sm mb-3">
-    <span class="input-group-text">図面No</span>
-    <input type="text" id="no" class="form-control" size="10" oninput="fetchSearchInput()">
-  </div>
-  <div class="input-group input-group-sm mb-3">
-    <span class="input-group-text">図面名称</span>
-    <input type="text" id="name" class="form-control" size="10" oninput="fetchSearchInput()">
-  </div>
+  <table>
+    <tbody>
+      <tr>
+        <td>
+          <div class="input-group input-group-sm mb-3">
+            <span class="input-group-text">図面No</span>
+            <input type="text" id="no" class="form-control" size="10" oninput="fetchSearchInput()">
+          </div>
+        </td>
+        <td>
+          <div class="input-group input-group-sm mb-3">
+            <span class="input-group-text">図面名称</span>
+            <input type="text" id="name" class="form-control" size="10" oninput="fetchSearchInput()">
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
   <!-- 結果またはエラーの表示 -->
   <div class="spinner-border" role="status" style="display:none;">
