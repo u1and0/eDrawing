@@ -76,7 +76,8 @@ const main = async () => {
   const router = new Router();
   router
     .get("/", (ctx: RouterContext) => {
-      ctx.response.body = "Hello world!";
+      ctx.response.status = 301; // Moved Permanently
+      ctx.response.headers.set("Location", "/index");
     })
     .get("/index", (ctx: RouterContext) => topPage(ctx));
 
