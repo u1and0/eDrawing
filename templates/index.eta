@@ -6,35 +6,27 @@
   <link href="/style.css" rel="stylesheet">
 </head>
 <body>
-  <h1>eDrawing</h1>
-
-  <!-- 検索窓 -->
-  <table>
-    <tbody>
-      <tr>
-        <td>
-          <div class="input-group input-group-sm mb-3">
-            <span class="input-group-text">図面No</span>
-            <input type="text" id="no" class="form-control" size="10" oninput="fetchSearchInput()">
-          </div>
-        </td>
-        <td>
-          <div class="input-group input-group-sm mb-3">
-            <span class="input-group-text">図面名称</span>
-            <input type="text" id="name" class="form-control" size="10" oninput="fetchSearchInput()">
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- 結果またはエラーの表示 -->
-  <div class="spinner-border" role="status" style="display:none;">
-      <span class="visually-hidden">Loading...</span>
+  <div class="sidebar" id="search-window">
+    <h1>eDrawing</h1>
+    <div class="input-group input-group-sm mb-3">
+      <span class="input-group-text">図面No</span>
+      <input type="text" id="no" class="form-control" size="10" oninput="fetchSearchInput()">
+    </div>
+    <div class="input-group input-group-sm mb-3">
+      <span class="input-group-text">図面名称</span>
+      <input type="text" id="name" class="form-control" size="10" oninput="fetchSearchInput()">
+    </div>
   </div>
 
-  <div id="error-div"></div>
-  <table id="result-table" class="table table-striped table-hover"></table>
+  <div class="main" id="main-panel">
+    <div class="spinner-border" role="status" style="display:none;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+
+    <!-- 結果またはエラーの表示 -->
+    <div id="error-div"></div>
+    <table id="result-table" class="table table-striped table-hover"></table>
+  </div>
 
   <script type="text/javascript" src="/main.js"></script>
 </body>
