@@ -114,17 +114,39 @@ const createTable = (drawings: Drawing[]): void => {
       const td = tr.insertCell();
       if (h.name === "図面No") {
         // バイナリをBlobへ変換
+        const ext = drawing.filename.split(".").pop();
         const array = new Uint8Array(drawing.binary);
-        const blob = new Blob([array]);
+        const blob = new Blob([array], { type: `image/${ext}` });
+
+        // BlobオブジェクトをURLに変換
+        const objectUrl = URL.createObjectURL(blob);
+
+        // サムネイルイメージ用の要素を作成
+        const img = document.getElementById("img");
+        if (!img) return;
+        img.setAttribute("style", "displey='none'");
+
         // バイナリとファイル名をaタグへ挿入
         const a = document.createElement("a");
         // Blob オブジェクトをURLへ変換し、aタグへ挿入
-        a.href = URL.createObjectURL(blob);
+        a.href = objectUrl;
 
         // ファイル名を決めてaタグへ挿入
-        const ext = drawing.filename.split(".").pop();
         a.download = `${drawing.no}_${drawing.name}.${ext}`;
         a.textContent = drawing.no;
+
+        // マウスオーバー時にサムネイルを表示
+        a.addEventListener("mouseover", () => {
+          img.setAttribute("src", objectUrl);
+          img.style.display = "inline";
+          img.setAttribute("width", "100vw");
+        });
+
+        // マウスが移動した時にサムネイルを非表示
+        a.addEventListener("mouseout", () => {
+          img.style.display = "none";
+        });
+
         td.appendChild(a);
       } else {
         const text: string = drawing[h.value] === null

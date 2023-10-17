@@ -35,6 +35,7 @@
 
   <div id="error-div"></div>
   <table id="result-table" class="table table-striped table-hover"></table>
+  <img id="img">
 
   <script type="text/javascript" src="/main.js"></script>
 </body>
