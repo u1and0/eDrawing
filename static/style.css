@@ -2,3 +2,18 @@ h1 {
     color: #eeaa44;
     font-weight: bold;
 }
+
+.sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #67a;
+    padding-top: 20px;
+}
+
+.main {
+    margin-left: 250px;
+    padding: 20px;
+}
