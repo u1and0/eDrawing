@@ -1,3 +1,4 @@
+<!-- vim: expandtab=2 ft=html : -->
 <head>
   <title>eDrawing</title>
   <meta version=<%= it.version %>!>
@@ -16,6 +17,7 @@
       <span class="input-group-text">図面名称</span>
       <input type="text" id="name" class="form-control" size="10" oninput="fetchSearchInput()">
     </div>
+    <table id="tree-viewer"></table>
   </div>
 
   <div class="main" id="main-panel">
