@@ -118,13 +118,12 @@ const createTable = (drawings: Drawing[]): void => {
         const array = new Uint8Array(drawing.binary);
         const blob = new Blob([array], { type: `image/${ext}` });
 
-        // BlobオブジェクトをURLに変換
-        const objectUrl = URL.createObjectURL(blob);
-
-        // サムネイルイメージ用の要素を作成
+        // 画像を表示するエレメントを取得
         const img = document.getElementById("img");
         if (!img) return;
-        img.setAttribute("style", "displey='none'");
+
+        // BlobオブジェクトをURLに変換
+        const objectUrl = URL.createObjectURL(blob);
 
         // バイナリとファイル名をaタグへ挿入
         const a = document.createElement("a");
@@ -139,12 +138,7 @@ const createTable = (drawings: Drawing[]): void => {
         a.addEventListener("mouseover", () => {
           img.setAttribute("src", objectUrl);
           img.style.display = "inline";
-          img.setAttribute("width", "100vw");
-        });
-
-        // マウスが移動した時にサムネイルを非表示
-        a.addEventListener("mouseout", () => {
-          img.style.display = "none";
+          img.setAttribute("width", "200");
         });
 
         td.appendChild(a);
