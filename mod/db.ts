@@ -1,6 +1,7 @@
 /* データベース関連クラス */
 import { DB } from "https:deno.land/x/sqlite/mod.ts";
 import { walk } from "https:deno.land/std/fs/mod.ts";
+import { Drawing } from "./file.ts";
 
 const dbfile = "./data/edrawing.db";
 const tableName = "DrawingTable";
@@ -13,6 +14,24 @@ export async function readFiles(root: string): Promise<string[]> {
     }
   }
   return paths;
+}
+
+// サムネイルを作成
+export async function createThumbnail(inputFile: string): Promise<Uint8Array> {
+  const outputFile = `${inputFile.split(".")[0]}.png`; // 拡張子をpngに変更
+  console.debug(`convert -scale 50% ${inputFile} ${outputFile}`);
+  const command = new Deno.Command("convert", {
+    args: ["-scale", "50%", inputFile, outputFile],
+    // cwd: "./data",
+  });
+  const { code, success, signal, stdout, stderr } = await command.output();
+  if (!success) {
+    throw new Error(`convert command failed: error code ${code}, ${stderr}`);
+  }
+  console.debug(`succsess ${inputFile} -> ${outputFile}`);
+  const thumbnail: Uint8Array = Deno.readFileSync(outputFile);
+  Deno.removeSync(outputFile);
+  return thumbnail;
 }
 
 export class EDB extends DB {
@@ -31,6 +50,7 @@ export class EDB extends DB {
         modifiedDate: row[5] as Date,
         filename: row[6] as string,
         binary: Array.from(row[7] as Uint8Array),
+        thumbnail: Array.from(row[8] as Uint8Array),
       };
       this.drawings.push(drawing);
     }
@@ -51,7 +71,8 @@ export class EDB extends DB {
                modifier TEXT,
                modifiedDate TEXT,
                filename TEXT,
-               binary BLOB
+               binary BLOB,
+               thumbnail BLOB
              )
              `);
   }
@@ -67,6 +88,7 @@ export class EDB extends DB {
       d.modifiedDate as Date,
       d.filename as string,
       d.binary as Uint8Array,
+      d.thumbnail as Uint8Array,
     ];
     console.log(convert);
     super.query(
@@ -78,8 +100,9 @@ export class EDB extends DB {
         modifier,
         modifiedDate,
         filename,
-        binary
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        binary,
+        thumbnail
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       convert,
     );
   }

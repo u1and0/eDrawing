@@ -8,36 +8,53 @@ import {
   send,
 } from "https:deno.land/x/oak/mod.ts";
 
-import { EDB, readFiles } from "./mod/db.ts";
+import { createThumbnail, EDB, readFiles } from "./mod/db.ts";
 import { Drawing } from "./mod/file.ts";
 
 const VERSION = "v0.1.0";
 
 // テストデータを更新
-const newTest = () => {
+const newTest = async () => {
   const db = new EDB();
   db.refresh();
-  readFiles("./data")
+  await readFiles("./data")
     .then((imagePaths) => {
-      imagePaths.forEach((path: string, i: number) => {
+      imagePaths.forEach(async (path: string, i: number) => {
         // イメージの読み込み
         const image: Uint8Array = Deno.readFileSync(path);
-        // Drawingを規定
-        const drawing: Drawing = {
-          no: `RSW55555${i}`,
-          name: `テストモジュール${i}`,
-          creator: `Tester${i}`,
-          createdDate: new Date(2000, 1, 2, 6, 4, 5),
-          modifier: `Tester${i + 10}`,
-          modifiedDate: new Date(),
-          filename: path,
-          binary: image,
-        };
-        // 図面をDBへ登録
-        db.insert(drawing);
+        await createThumbnail(path)
+          .then((thumbnail) => {
+            // Drawingを規定
+            const drawing: Drawing = {
+              no: `RSW55555${i}`,
+              name: `テストモジュール${i}`,
+              creator: `Tester${i}`,
+              createdDate: new Date(2000, 1, 2, 6, 4, 5),
+              modifier: `Tester${i + 10}`,
+              modifiedDate: new Date(),
+              filename: path,
+              binary: image,
+              thumbnail: thumbnail,
+            };
+            // 図面をDBへ登録
+            db.insert(drawing);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
       });
-      db.close();
     });
+  // db close するとinsertできない。forEachの後に
+  // db.closeしているのになんで？？
+  //
+  // SqliteError: Database was closed.
+  //     at EDB.prepareQuery (https://deno.land/x/sqlite@v3.8/src/db.ts:357:13)
+  //     at EDB.query (https://deno.land/x/sqlite@v3.8/src/db.ts:258:24)
+  //     at EDB.insert (file:///mnt/3_Personal/2%E8%AA%B2/ando-yu/vms/fekoubuntu/eDrawing/mod/db.ts:
+  // 93:11)
+  //     at file:///mnt/3_Personal/2%E8%AA%B2/ando-yu/vms/fekoubuntu/eDrawing/index.ts:40:16
+  //     at async file:///mnt/3_Personal/2%E8%AA%B2/ando-yu/vms/fekoubuntu/eDrawing/index.ts:25:9
+  // db.close();
 };
 
 const main = async () => {
@@ -91,7 +108,7 @@ const main = async () => {
 
   /* appを立てて配信 */
   const app = new Application();
-  const port = 3000;
+  const port = 8000;
   app.use(router.routes());
   app.use(router.allowedMethods());
   app.use(async (ctx: RouterContext) => {
@@ -106,4 +123,4 @@ const main = async () => {
 };
 
 await main();
-// newTest(); // 古いテストデータを捨てて新しいテストデータを構築する
+// await newTest(); // 古いテストデータを捨てて新しいテストデータを構築する

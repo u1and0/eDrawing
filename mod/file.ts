@@ -10,6 +10,7 @@ export type Drawing = {
   // Image
   filename: string;
   binary: Uint8Array;
+  thumbnail: Uint8Array;
   // Folder info
   // pairentsFolder: Folder[];
   // Graph info

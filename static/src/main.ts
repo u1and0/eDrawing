@@ -7,6 +7,7 @@ type Drawing = {
   name: string;
   filename: string;
   binary: number[];
+  thumbnail: number[];
 };
 
 type Header = {
@@ -113,30 +114,34 @@ const createTable = (drawings: Drawing[]): void => {
     header.forEach((h: Header) => {
       const td = tr.insertCell();
       if (h.name === "図面No") {
+        // ダウンロードリンク
+        //
         // バイナリをBlobへ変換
         const ext = drawing.filename.split(".").pop();
         const array = new Uint8Array(drawing.binary);
         const blob = new Blob([array], { type: `image/${ext}` });
 
-        // 画像を表示するエレメントを取得
-        const img = document.getElementById("img");
-        if (!img) return;
-
-        // BlobオブジェクトをURLに変換
-        const objectUrl = URL.createObjectURL(blob);
-
         // バイナリとファイル名をaタグへ挿入
         const a = document.createElement("a");
         // Blob オブジェクトをURLへ変換し、aタグへ挿入
-        a.href = objectUrl;
+        a.href = URL.createObjectURL(blob);
 
         // ファイル名を決めてaタグへ挿入
         a.download = `${drawing.no}_${drawing.name}.${ext}`;
         a.textContent = drawing.no;
 
+        // サムネイル
+        //
+        // 画像を表示するエレメントを取得
+        const img = document.getElementById("img");
+        if (!img) return;
+
         // マウスオーバー時にサムネイルを表示
         a.addEventListener("mouseover", () => {
-          img.setAttribute("src", objectUrl);
+          // サムネイルを作成
+          const array = new Uint8Array(drawing.thumbnail);
+          const blob = new Blob([array], { type: "image/png" });
+          img.setAttribute("src", URL.createObjectURL(blob));
           img.style.display = "inline";
           img.setAttribute("width", "200");
         });
