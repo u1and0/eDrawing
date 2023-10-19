@@ -120,30 +120,55 @@ const createTable = (drawings: Drawing[]): void => {
         const ext = drawing.filename.split(".").pop();
         const array = new Uint8Array(drawing.binary);
         const blob = new Blob([array], { type: `image/${ext}` });
+        const tiffDownloadLink = URL.createObjectURL(blob);
 
         // バイナリとファイル名をaタグへ挿入
         const a = document.createElement("a");
         // Blob オブジェクトをURLへ変換し、aタグへ挿入
-        a.href = URL.createObjectURL(blob);
+        a.href = tiffDownloadLink;
 
         // ファイル名を決めてaタグへ挿入
-        a.download = `${drawing.no}_${drawing.name}.${ext}`;
+        const filename = `${drawing.no}_${drawing.name}.${ext}`;
+        a.download = filename;
         a.textContent = drawing.no;
 
         // サムネイル
         //
         // 画像を表示するエレメントを取得
-        const img = document.getElementById("img");
+        const imgAtag = document.getElementById("thumbnail");
+        if (!imgAtag) return;
+        const img = imgAtag.querySelector("img");
         if (!img) return;
+        const imagePopup = document.getElementById("image-popup");
+        if (!imagePopup) return;
+        const imagePopupImg = imagePopup.querySelector("img");
+        if (!imagePopupImg) return;
+        const closeButton = document.getElementById("close-button");
+        if (!closeButton) return;
 
         // マウスオーバー時にサムネイルを表示
         a.addEventListener("mouseover", () => {
+          // サムネイルaタグにリンクを追加
+          imgAtag.setAttribute("href", tiffDownloadLink);
+          imgAtag.setAttribute("download", filename);
           // サムネイルを作成
           const array = new Uint8Array(drawing.thumbnail);
           const blob = new Blob([array], { type: "image/png" });
           img.setAttribute("src", URL.createObjectURL(blob));
-          img.style.display = "inline";
-          img.setAttribute("width", "200");
+          imagePopupImg.setAttribute("src", URL.createObjectURL(blob));
+
+          // マウスオーバーで拡大
+          img.addEventListener("mouseover", () => {
+            // img.style.transform = "scale(4)";
+            imagePopup.style.display = "block";
+            imagePopupImg.style.maxWidth = window.innerWidth + "px";
+            imagePopupImg.style.maxHeight = window.innerHeight + "px";
+          });
+
+          closeButton.addEventListener("click", () => {
+            // img.style.transform = "scale(1)";
+            imagePopup.style.display = "none";
+          });
         });
 
         td.appendChild(a);

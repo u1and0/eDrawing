@@ -108,7 +108,7 @@ const main = async () => {
 
   /* appを立てて配信 */
   const app = new Application();
-  const port = 8000;
+  const port = 3000;
   app.use(router.routes());
   app.use(router.allowedMethods());
   app.use(async (ctx: RouterContext) => {

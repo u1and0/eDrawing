@@ -18,7 +18,13 @@
       <input type="text" id="name" class="form-control" size="10" oninput="fetchSearchInput()">
     </div>
     <table id="tree-viewer"></table>
-    <img id="img">
+    <a href="#" id="thumbnail">
+      <img width=200>
+    </a>
+    <div id="image-popup">
+      <img alt="拡大画像">
+      <span id="close-button">閉じる</span>
+    </div>
   </div>
 
   <div class="main" id="main-panel">
